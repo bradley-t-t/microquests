@@ -14,8 +14,8 @@ Published on Spigot: <https://www.spigotmc.org/resources/124181/>
 
 ## Requirements
 
-- Paper or Spigot 1.21+
-- Java 17+
+- Paper or Spigot, Minecraft 1.21 through 26.2
+- Java 17 or newer
 
 ## Installation
 

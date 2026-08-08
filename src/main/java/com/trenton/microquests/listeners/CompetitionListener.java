@@ -15,8 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 
 @CoreListener(
    name = "CompetitionListener"
@@ -52,9 +52,9 @@ public class CompetitionListener implements CoreListenerInterface {
                      && quest.getItem() == breakEvent.getBlock().getType()) {
                   comp.incrementProgress(player.getUniqueId());
                }
-            } else if (event instanceof PlayerPickupItemEvent pickupEvent) {
-               Player player = pickupEvent.getPlayer();
-               if (!this.optOut.contains(player.getUniqueId())
+            } else if (event instanceof EntityPickupItemEvent pickupEvent) {
+               if (pickupEvent.getEntity() instanceof Player player
+                     && !this.optOut.contains(player.getUniqueId())
                      && comp.getQuest() instanceof GatherQuest quest
                      && quest.getItem() == pickupEvent.getItem().getItemStack().getType()) {
                   comp.incrementProgress(player.getUniqueId());
@@ -77,6 +77,6 @@ public class CompetitionListener implements CoreListenerInterface {
    }
 
    public Class<? extends Event>[] getHandledEvents() {
-      return new Class[]{EntityDeathEvent.class, BlockBreakEvent.class, PlayerPickupItemEvent.class, CraftItemEvent.class};
+      return new Class[]{EntityDeathEvent.class, BlockBreakEvent.class, EntityPickupItemEvent.class, CraftItemEvent.class};
    }
 }
