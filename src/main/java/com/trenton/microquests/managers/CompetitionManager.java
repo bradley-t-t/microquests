@@ -3,11 +3,15 @@ package com.trenton.microquests.managers;
 import com.trenton.microquests.MicroQuests;
 import com.trenton.microquests.competition.Competition;
 import com.trenton.microquests.competition.QuestGenerator;
+import com.trenton.microquests.competition.quests.Quest;
 import com.trenton.coreapi.annotations.CoreManager;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Starts a new competition on a fixed interval whenever none is running and
+ * enough players are online.
+ */
 @CoreManager(
    name = "CompetitionManager"
 )
@@ -24,9 +28,8 @@ public class CompetitionManager {
 
    public void shutdown() {
       if (this.activeCompetition != null && this.activeCompetition.isActive()) {
-         this.activeCompetition.end((Player)null);
+         this.activeCompetition.end(null);
       }
-
    }
 
    private void startInterval() {
@@ -47,8 +50,11 @@ public class CompetitionManager {
                int onlinePlayers = Bukkit.getOnlinePlayers().size();
                int minPlayers = localConfigManager.getConfig().getInt("min-players");
                if (onlinePlayers >= minPlayers) {
-                  CompetitionManager.this.activeCompetition = new Competition(CompetitionManager.this.plugin, (new QuestGenerator(CompetitionManager.this.plugin)).generateQuest());
-                  CompetitionManager.this.activeCompetition.start();
+                  Quest quest = (new QuestGenerator(CompetitionManager.this.plugin)).generateQuest();
+                  if (quest != null) {
+                     CompetitionManager.this.activeCompetition = new Competition(CompetitionManager.this.plugin, quest);
+                     CompetitionManager.this.activeCompetition.start();
+                  }
                }
             }
 

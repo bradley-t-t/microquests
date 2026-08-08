@@ -6,7 +6,6 @@ import com.trenton.coreapi.annotations.CoreManager;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,6 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+/**
+ * Pays out competition wins. Runs the configured victory commands as
+ * console; when none are configured, falls back to the configured XP, item,
+ * and potion-effect rewards. Amounts accept a fixed number or a
+ * {@code min-max} range rolled per win.
+ */
 @CoreManager(
    name = "RewardManager"
 )
@@ -34,7 +39,7 @@ public class RewardManager {
    public void rewardWinner(Player player, Quest quest) {
       boolean commandsExecuted = false;
 
-      for(String cmd : this.victoryCommands) {
+      for (String cmd : this.victoryCommands) {
          try {
             if (cmd.startsWith("/")) {
                cmd = cmd.substring(1);
@@ -44,9 +49,7 @@ public class RewardManager {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
             commandsExecuted = true;
          } catch (Exception e) {
-            Logger var10000 = this.plugin.getLogger();
-            String var10001 = player.getName();
-            var10000.warning("Failed to execute reward command for " + var10001 + ": " + cmd + " (" + e.getMessage() + ")");
+            this.plugin.getLogger().warning("Failed to execute reward command for " + player.getName() + ": " + cmd + " (" + e.getMessage() + ")");
          }
       }
 
@@ -57,30 +60,27 @@ public class RewardManager {
             player.giveExp(xp);
          }
 
-         for(Object obj : this.plugin.getConfig().getList("rewards.fallback.items", List.of())) {
-            if (obj instanceof Map) {
-               Map<String, Object> itemMap = (Map)obj;
-               Material material = Material.getMaterial((String)itemMap.get("material"));
+         for (Object obj : this.plugin.getConfig().getList("rewards.fallback.items", List.of())) {
+            if (obj instanceof Map<?, ?> itemMap) {
+               Material material = Material.getMaterial((String) itemMap.get("material"));
                if (material != null) {
-                  int amount = this.parseRange((String)itemMap.get("amount"));
-                  player.getInventory().addItem(new ItemStack[]{new ItemStack(material, amount)});
+                  int amount = this.parseRange((String) itemMap.get("amount"));
+                  player.getInventory().addItem(new ItemStack(material, amount));
                }
             }
          }
 
-         for(Object obj : this.plugin.getConfig().getList("rewards.fallback.buffs", List.of())) {
-            if (obj instanceof Map) {
-               Map<String, Object> buffMap = (Map)obj;
-               PotionEffectType effect = PotionEffectType.getByName((String)buffMap.get("effect"));
+         for (Object obj : this.plugin.getConfig().getList("rewards.fallback.buffs", List.of())) {
+            if (obj instanceof Map<?, ?> buffMap) {
+               PotionEffectType effect = PotionEffectType.getByName((String) buffMap.get("effect"));
                if (effect != null) {
-                  int duration = ((Number)buffMap.get("duration")).intValue() * 20;
-                  int amplifier = ((Number)buffMap.get("amplifier")).intValue();
+                  int duration = ((Number) buffMap.get("duration")).intValue() * 20;
+                  int amplifier = ((Number) buffMap.get("amplifier")).intValue();
                   player.addPotionEffect(new PotionEffect(effect, duration, amplifier));
                }
             }
          }
       }
-
    }
 
    private int parseRange(String range) {
@@ -93,7 +93,7 @@ public class RewardManager {
          } else {
             return Integer.parseInt(range);
          }
-      } catch (NumberFormatException var5) {
+      } catch (NumberFormatException e) {
          return 0;
       }
    }

@@ -15,6 +15,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+/**
+ * Picks a random quest from the types that have valid entries in
+ * {@code quests.yml}, weighting kill quests when any player is underground
+ * and gather quests otherwise. Returns null when nothing valid is
+ * configured.
+ */
 public class QuestGenerator {
    private final MicroQuests plugin;
    private final ConfigManager configManager;
@@ -27,9 +33,9 @@ public class QuestGenerator {
    }
 
    public Quest generateQuest() {
-      List<Player> players = new ArrayList(Bukkit.getOnlinePlayers());
-      boolean underground = players.stream().anyMatch((p) -> p.getLocation().getY() < (double)50.0F);
-      List<String> possibleTypes = new ArrayList();
+      List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+      boolean underground = players.stream().anyMatch((p) -> p.getLocation().getY() < 50.0);
+      List<String> possibleTypes = new ArrayList<>();
       if (!this.configManager.getValidKillMobs().isEmpty()) {
          possibleTypes.add("kill");
       }
@@ -46,7 +52,7 @@ public class QuestGenerator {
          this.plugin.getLogger().warning("No valid quest configurations found. Cannot generate quest.");
          return null;
       } else {
-         List<String> weightedTypes = new ArrayList();
+         List<String> weightedTypes = new ArrayList<>();
          if (underground) {
             if (possibleTypes.contains("kill")) {
                weightedTypes.add("kill");
@@ -79,7 +85,7 @@ public class QuestGenerator {
             this.plugin.getLogger().warning("No quests available for the current context.");
             return null;
          } else {
-            switch ((String)weightedTypes.get(this.random.nextInt(weightedTypes.size()))) {
+            switch (weightedTypes.get(this.random.nextInt(weightedTypes.size()))) {
                case "kill" -> {
                   return this.generateKillQuest();
                }
@@ -102,7 +108,7 @@ public class QuestGenerator {
       if (mobs.isEmpty()) {
          return null;
       } else {
-         EntityType mob = (EntityType)mobs.get(this.random.nextInt(mobs.size()));
+         EntityType mob = mobs.get(this.random.nextInt(mobs.size()));
          int minAmount = this.configManager.getKillMinAmount();
          int maxAmount = this.configManager.getKillMaxAmount();
          int amount = minAmount + this.random.nextInt(maxAmount - minAmount + 1);
@@ -118,7 +124,7 @@ public class QuestGenerator {
       if (items.isEmpty()) {
          return null;
       } else {
-         Material item = (Material)items.get(this.random.nextInt(items.size()));
+         Material item = items.get(this.random.nextInt(items.size()));
          int minAmount = this.configManager.getGatherMinAmount();
          int maxAmount = this.configManager.getGatherMaxAmount();
          int amount = minAmount + this.random.nextInt(maxAmount - minAmount + 1);
@@ -134,7 +140,7 @@ public class QuestGenerator {
       if (items.isEmpty()) {
          return null;
       } else {
-         Material item = (Material)items.get(this.random.nextInt(items.size()));
+         Material item = items.get(this.random.nextInt(items.size()));
          int minAmount = this.configManager.getCraftMinAmount();
          int maxAmount = this.configManager.getCraftMaxAmount();
          int amount = minAmount + this.random.nextInt(maxAmount - minAmount + 1);

@@ -11,6 +11,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * One server-wide quest race: every participating player works on the same
+ * objective, and the first to reach the target amount wins and is rewarded.
+ * A competition that reaches its configured time limit ends with no winner.
+ */
 public class Competition {
    private final MicroQuests plugin;
    private final Quest quest;
@@ -21,7 +26,7 @@ public class Competition {
    public Competition(MicroQuests plugin, Quest quest) {
       this.plugin = plugin;
       this.quest = quest;
-      this.progress = new HashMap();
+      this.progress = new HashMap<>();
       this.startTime = System.currentTimeMillis();
       this.active = false;
    }
@@ -33,13 +38,16 @@ public class Competition {
       (new BukkitRunnable() {
          public void run() {
             if (Competition.this.active) {
-               Competition.this.end((Player)null);
+               Competition.this.end(null);
             }
 
          }
       }).runTaskLater(this.plugin, this.plugin.getConfig().getLong("max-quest-time") * 20L);
    }
 
+   /**
+    * Ends the competition. A null winner means it expired unclaimed.
+    */
    public void end(Player winner) {
       if (this.active) {
          this.active = false;
@@ -69,7 +77,7 @@ public class Competition {
          if (player != null) {
             this.progress.merge(uuid, 1, Integer::sum);
             MessageUtils.sendActionBar(this.plugin.getCoreAPI().getMessages(), player, "progress-update", this.quest.getObjective(), this.progress.get(uuid), this.quest.getAmount());
-            if ((Integer)this.progress.get(uuid) >= this.quest.getAmount()) {
+            if (this.progress.get(uuid) >= this.quest.getAmount()) {
                this.end(player);
             }
 
@@ -78,7 +86,7 @@ public class Competition {
    }
 
    public int getProgress(UUID uuid) {
-      return (Integer)this.progress.getOrDefault(uuid, 0);
+      return this.progress.getOrDefault(uuid, 0);
    }
 
    public boolean isActive() {

@@ -14,6 +14,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
+/**
+ * Loads the plugin's configuration files, validates the quest pools from
+ * {@code quests.yml} into typed lists, and persists the set of players who
+ * opted out of competitions in {@code optout.yml}.
+ */
 @CoreManager(
    name = "ConfigManager"
 )
@@ -36,7 +41,7 @@ public class ConfigManager {
       this.questsConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "quests.yml"));
       this.optOutFile = new File(plugin.getDataFolder(), "optout.yml");
       this.optOutConfig = YamlConfiguration.loadConfiguration(this.optOutFile);
-      this.optOut = new HashSet();
+      this.optOut = new HashSet<>();
       if (this.optOutConfig.contains("optout")) {
          for(String uuid : this.optOutConfig.getStringList("optout")) {
             this.optOut.add(UUID.fromString(uuid));
@@ -85,10 +90,10 @@ public class ConfigManager {
 
    private void validateMobs() {
       List<String> mobs = this.questsConfig.getStringList("kill_quests.mobs");
-      this.validKillMobs = new ArrayList();
+      this.validKillMobs = new ArrayList<>();
 
       for(int i = 0; i < mobs.size(); ++i) {
-         String mobName = (String)mobs.get(i);
+         String mobName = mobs.get(i);
 
          try {
             EntityType mob = EntityType.valueOf(mobName.toUpperCase());
@@ -104,10 +109,10 @@ public class ConfigManager {
 
    private void validateGatherItems() {
       List<String> items = this.questsConfig.getStringList("gather_quests.items");
-      this.validGatherItems = new ArrayList();
+      this.validGatherItems = new ArrayList<>();
 
       for(int i = 0; i < items.size(); ++i) {
-         String itemName = (String)items.get(i);
+         String itemName = items.get(i);
 
          try {
             Material item = Material.valueOf(itemName.toUpperCase());
@@ -123,10 +128,10 @@ public class ConfigManager {
 
    private void validateCraftItems() {
       List<String> items = this.questsConfig.getStringList("craft_quests.items");
-      this.validCraftItems = new ArrayList();
+      this.validCraftItems = new ArrayList<>();
 
       for(int i = 0; i < items.size(); ++i) {
-         String itemName = (String)items.get(i);
+         String itemName = items.get(i);
 
          try {
             Material item = Material.valueOf(itemName.toUpperCase());
