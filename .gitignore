@@ -2,3 +2,11 @@ target/
 .idea/
 *.iml
 dependency-reduced-pom.xml
+.vscode/
+.fleet/
+.claude/
+CLAUDE.md
+.env
+.env.*
+.DS_Store
+Thumbs.db
