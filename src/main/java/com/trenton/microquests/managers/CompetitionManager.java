@@ -19,10 +19,14 @@ public class CompetitionManager {
    private MicroQuests plugin;
    private Competition activeCompetition;
    private ConfigManager configManager;
+   private long lastStartMillis;
 
    public void init(MicroQuests plugin) {
       this.plugin = plugin;
       this.configManager = (ConfigManager)plugin.getCoreAPI().getManager("ConfigManager");
+      // A fresh boot counts as a start, so the first competition arrives one
+      // interval in rather than the moment enough players are on.
+      this.lastStartMillis = System.currentTimeMillis();
       this.startInterval();
    }
 
@@ -47,6 +51,11 @@ public class CompetitionManager {
             }
 
             if (CompetitionManager.this.activeCompetition == null || !CompetitionManager.this.activeCompetition.isActive()) {
+               long intervalMillis = localConfigManager.getConfig().getInt("interval", 900) * 1000L;
+               if (System.currentTimeMillis() - CompetitionManager.this.lastStartMillis < intervalMillis) {
+                  return;
+               }
+
                int onlinePlayers = Bukkit.getOnlinePlayers().size();
                int minPlayers = localConfigManager.getConfig().getInt("min-players");
                if (onlinePlayers >= minPlayers) {
@@ -54,6 +63,7 @@ public class CompetitionManager {
                   if (quest != null) {
                      CompetitionManager.this.activeCompetition = new Competition(CompetitionManager.this.plugin, quest);
                      CompetitionManager.this.activeCompetition.start();
+                     CompetitionManager.this.lastStartMillis = System.currentTimeMillis();
                   }
                }
             }
