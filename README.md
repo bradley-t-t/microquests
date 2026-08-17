@@ -86,6 +86,31 @@ All player-facing text lives in `messages.yml` and supports `&` color codes.
 | :--- | :--- | :--- |
 | `microquests.update.notify` | op | Receive update notifications. |
 
+## Architecture
+
+```mermaid
+flowchart TD
+    T["Interval task"] --> Enough{"Enough players online?"}
+    Enough -->|"no"| T
+    Enough -->|"yes"| Gen["QuestGenerator — roll a type and an amount from quests.yml"]
+    Gen --> Comp["Competition — one live race, progress per player"]
+    Comp --> L["CompetitionListener — kills, pickups, crafts"]
+    L --> Comp
+    Comp --> Done{"Someone hits the target before the clock?"}
+    Done -->|"yes"| Rw["RewardManager pays the winner"]
+    Done -->|"no"| Exp["Expires unclaimed"]
+    Rw --> T
+    Exp --> T
+    Q["/quest status | optout"] --> Comp
+```
+
+## How it works
+
+- **Nobody starts it.** A repeating task opens a competition once enough players are online, and the same task picks up again after one is won or expires — there is no command a staff member has to remember.
+- **The quest is rolled, not authored.** `QuestGenerator` picks a type from `kill_quests`, `gather_quests`, or `craft_quests` in `quests.yml` and an amount from that entry's range, so the pool of what the server can be asked to do is entirely config.
+- **Everyone is entered by default.** Progress is scored from events every player is already generating — mob kills, item pickups, crafts — so the race needs no signup; `/quest optout` is how a player leaves it.
+- **One winner, then it closes.** The first player to reach the target takes the reward and the competition ends immediately; if the clock runs out first it expires unclaimed and nothing is paid.
+
 ## Project structure
 
 ```
@@ -117,6 +142,10 @@ mvn package
 ```
 
 The shaded jar lands in `target/`.
+
+## License
+
+Copyright (c) 2026 Trenton Taylor. All rights reserved.
 
 <br />
 
