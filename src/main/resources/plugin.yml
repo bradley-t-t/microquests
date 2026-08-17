@@ -1,5 +1,5 @@
 name: MicroQuests
-version: '1.9'
+version: '1.10'
 main: com.trenton.microquests.MicroQuests
 api-version: '1.21'
 authors: [ Trent ]
